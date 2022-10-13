@@ -26,6 +26,7 @@ def main(_):
     test_file = FLAGS.test_file
     train_set, train_label = dataset_utils.read_file(train_file)
     test_set, test_label = dataset_utils.read_file(test_file)
+    mean_data_img_train = np.mean(train_set, axis=0)
     # dataset statistics
     print("Train file length", len(train_set))
     print("Train file label length", len(train_label))
@@ -50,8 +51,6 @@ def main(_):
         'b2': tf.Variable(tf.random_normal([FLAGS.n_hidden_2])),
         'out': tf.Variable(tf.random_normal([FLAGS.n_classes]))
     }
-
-    mean_data_img_train = np.mean(train_set, axis=0)
 
     with tf.name_scope('input'):
         input_images = tf.placeholder(tf.float32, shape=(None, FLAGS.input_emb_size), name='input_images')
