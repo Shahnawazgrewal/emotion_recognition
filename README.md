@@ -13,6 +13,7 @@ The code we used is released by authors and is publicly available [here](https:/
 ### Training
 
 ```
+
 python main.py --train_file voxFeats/train.pkl --test_file voxFeats/test.pkl --batch_size 35 --input_emb_size 512 -epochs 50
 
 ```
