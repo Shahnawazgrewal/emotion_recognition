@@ -11,7 +11,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 def split(a, n):
     k, m = divmod(len(a), n)
-    return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
+    return (a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+
 
 def get_batch(batch_index, batch_size, labels, f_lst):
     start_ind = batch_index * batch_size
@@ -25,7 +26,7 @@ def main(_):
     test_file = FLAGS.test_file
     train_set, train_label = dataset_utils.read_file(train_file)
     test_set, test_label = dataset_utils.read_file(test_file)
-
+    # dataset statistics
     print("Train file length", len(train_set))
     print("Train file label length", len(train_label))
     print("Test file length", len(test_set))
@@ -50,11 +51,6 @@ def main(_):
         'out': tf.Variable(tf.random_normal([FLAGS.n_classes]))
     }
 
-
-    # combined = list(zip(train_set, train_label))
-    # random.shuffle(combined)
-    # train_set[:], train_label[:] = zip(*combined)
-
     mean_data_img_train = np.mean(train_set, axis=0)
 
     with tf.name_scope('input'):
@@ -62,11 +58,9 @@ def main(_):
         labels = tf.placeholder(tf.int64, shape=(None), name='labels')
 
     features, total_loss, accuracy = network.build_network(input_images, labels, weights,
-                                                   biases, FLAGS.n_classes)
+                                                           biases, FLAGS.n_classes)
 
     FLAGS.batch_size = 32
-    FLAGS.epochs = 50
-    steps_per_epoch = len(train_set) // FLAGS.batch_size
 
     global_step = tf.Variable(0, trainable=False, name='global_step')
     optimizer = tf.train.AdamOptimizer(0.001)  # learning rate.
@@ -75,16 +69,11 @@ def main(_):
     summary_op = tf.summary.merge_all()
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # writer = tf.summary.FileWriter('maxi-fig', sess.graph)
-    # step = sess.run(global_step) + 1
 
     num_train_samples = len(train_set)
     num_test_samples = len(test_set)
     num_of_batches = num_train_samples // FLAGS.batch_size
     num_of_batches_test = num_test_samples // FLAGS.batch_size
-
-    # epochs = 10
 
     for epoch in range(FLAGS.epochs):
         test_acc = 0.
@@ -99,7 +88,7 @@ def main(_):
                     input_images: batch_images - mean_data_img_train,
                     labels: batch_labels,
                 })
-            # writer.add_summary(summary_str, global_step=step)
+
             train_acc += train_batch_acc
             train_loss += train_batch_loss
 
@@ -123,14 +112,15 @@ def main(_):
         print(("Epoch: {}, Train_Acc:{:.4f}, Train_Loss:{:.4f}, Test_Acc:{:.4f}, Test_loss:{:.4f}".
                format(epoch, train_acc, train_loss, test_acc, test_loss)))
 
+
 if __name__ == '__main__':
     np.random.seed(0)
     tf.set_random_seed(0)
 
     parser = argparse.ArgumentParser()
     # Dataset and checkpoints.
-    parser.add_argument('--train_file', type=str, default= 'voxFeats/train.pkl', help='Path to the trail feature file.')
-    parser.add_argument('--test_file', type=str, default= 'voxFeats/test.pkl',  help='Path to the test feature file.')
+    parser.add_argument('--train_file', type=str, default='voxFeats/train.pkl', help='Path to the trail feature file.')
+    parser.add_argument('--test_file', type=str, default='voxFeats/test.pkl', help='Path to the test feature file.')
     # Training parameters.
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size for training.')
     parser.add_argument('--input_emb_size', type=int, default=512, help='Input embedding size.')
